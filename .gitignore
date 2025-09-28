@@ -1,0 +1,67 @@
+# -------------------------
+# Node.js / Express backend
+# -------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+.env
+.env.local
+
+# -------------------------
+# React / Vite frontend
+# -------------------------
+civic-frontend/node_modules/
+civic-frontend/.vite/
+civic-frontend/dist/
+civic-frontend/.env
+civic-frontend/.env.local
+
+# -------------------------
+# Python / AI (TensorFlow, etc.)
+# -------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.dll
+*.pkl
+*.h5
+*.ckpt
+*.pb
+*.onnx
+
+# Virtual environments
+venv/
+.venv/
+ENV/
+env/
+
+# -------------------------
+# OS & IDE files
+# -------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.iml
+
+# -------------------------
+# Logs & cache
+# -------------------------
+*.log
+*.out
+*.err
+.cache/
+coverage/
+
+# -------------------------
+# Build artifacts
+# -------------------------
+build/
+*.exe
+*.apk
+*.ipynb_checkpoints

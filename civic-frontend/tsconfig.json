@@ -1,0 +1,33 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json"},
+    { "path": "./tsconfig.node.json" }
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
+    // JavaScript/JSX
+    "allowJs": true,
+    "checkJs": false,
+    "jsx": "react-jsx",
+
+    // TypeScript strictness (can adjust as needed)
+    "noImplicitAny": false,
+    "noUnusedParameters": false,
+    "noUnusedLocals": false,
+    "strictNullChecks": false,
+    "skipLibCheck": true,
+
+    // Module/target
+    "target": "ES6",
+    "module": "ESNext",
+    "moduleResolution": "node"
+  },
+
+  // Include src files
+  "include": ["src"]
+}

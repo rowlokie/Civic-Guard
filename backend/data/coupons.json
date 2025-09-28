@@ -1,0 +1,18 @@
+[
+  {
+    "id": "zomato50",
+    "name": "Zomato ₹50 Voucher",
+    "description": "Redeem 10 URB to get ₹50 Zomato coupon",
+    "urbCost": 10,
+    "availableQuantity": 5,
+    "code": "ZOMATO50XYZ"
+  },
+  {
+    "id": "amazon100",
+    "name": "Amazon ₹100 Gift Card",
+    "description": "Redeem 20 URB for ₹100 Amazon credit",
+    "urbCost": 20,
+    "availableQuantity": 3,
+    "code": "AMAZON100ABC"
+  }
+]

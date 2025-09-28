@@ -1,0 +1,48 @@
+Postman
+
+Register             Login
+POST http://localhost:5000/api/auth/register
+{
+  "name": "Piyush",
+  "email": "piyush@example.com",
+  "password": "123456"
+}
+
+ Login Endpoint
+POST http://localhost:5000/api/auth/login
+
+{
+  "email": "piyush@example.com",
+  "password": "123456"
+}
+
+🔁 Method: POST   REPORT ISSUE   GET
+🧭 URL: http://localhost:5000/api/issues/report
+🧾 Step 1: Set Headers
+Go to the Headers tab in Postman and add:
+
+Key	Value
+Authorization	Bearer <your_JWT_token>
+
+🖼️ Step 2:
+
+KEY	TYPE	VALUE
+image	File	(Choose an image from your computer)
+type	Text	Pothole
+description	Text	Huge pothole near metro station
+location	Text	Andheri West, Mumbai
+confidence	Text	0.92
+
+Verify Issue
+PUT http://localhost:5000/api/issues/verify/<issue_id>
+
+
+npx hardhat init 
+
+http://localhost:5000/api/urbancoin/balance/0x407794FbdBdF679ab017b35bFdd7D9061F9c54f9
+http://localhost:5000/api/urbancoin/reward
+
+Coupons
+Get http://localhost:5000/api/coupons
+POST http://localhost:5000/api/coupons/claim/:id claim coupon
+     http://localhost:5000/api/coupons/redeem/:id  redeem coupon
