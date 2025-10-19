@@ -9,10 +9,12 @@ services:
     autoDeploy: true
     envVars:
       - key: PORT
-        value: 10000
-      - key: mongodb+srv://piyushbatavale02:imGQfxFp8vzzC02J@civic-gaurd.mvkyo6m.mongodb.net/Civic-Gaurd
-        sync: false
-      - key: 9a72e2bd0d3f76810a05b1e3c9a28d4db0fbc2a17d6b4dd64e9dc1a4be073aff
-        sync: false
-      - key: CLOUDINARY_URL=cloudinary://<284944877234935>:<IqN20vaxJe2pIMw6H19h2Z9W92U>@dwi1bz6vu
-        sync: false
+        value: "10000"
+      - key: MONGO_URI
+        value: "mongodb+srv://piyushbatavale02:imGQfxFp8vzzC02J@civic-gaurd.mvkyo6m.mongodb.net/Civic-Gaurd"
+      - key: CLOUDINARY_CLOUD_NAME
+        value: "dwi1bz6vu"
+      - key: CLOUDINARY_API_KEY
+        value: "284944877234935"
+      - key: CLOUDINARY_API_SECRET
+        value: "IqN20vaxJe2pIMw6H19h2Z9W92U"
