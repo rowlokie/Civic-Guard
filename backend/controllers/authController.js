@@ -1,7 +1,10 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import UrbanCoinABI from '../abis/UrbanCoinABI.json' assert { type: 'json' };
+const UrbanCoinABI = await import('../abis/UrbanCoinABI.json', {
+  assert: { type: 'json' }
+});
+const abi = UrbanCoinABI.default;
 import { ethers } from 'ethers';
 
 const TOKEN_ADDRESS = "0x348a6101297a3E414144D35f7484FB21EcCD3E4E";
