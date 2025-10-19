@@ -4,7 +4,7 @@ import { ThemeProvider } from "next-themes"; // Dark mode support
 
 import Navbar from "./Navbar/Navbar";
 import Home from "./pages/Home";
-import Login from "./pages/Login";
+import Login from "./pages/login";
 import Register from "./pages/Register";
 import ReportIssue from "./pages/Reportissue";
 import Issues from "./pages/Issues";
