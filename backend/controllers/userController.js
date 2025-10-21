@@ -1,6 +1,17 @@
 import User from '../models/User.js';
 import { ethers } from 'ethers';
-import UrbanCoinABI from '../abis/UrbanCoinABI.json' assert { type: "json" };
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Get current directory path (since __dirname is not available in ES modules)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Read ABI file safely
+const abiPath = path.resolve(__dirname, '../abis/UrbanCoinABI.json');
+const UrbanCoinABI = JSON.parse(fs.readFileSync(abiPath, 'utf8'));
+const abi = UrbanCoinABI;
 
 const RPC_URL = process.env.AMOY_RPC_URL;
 const CONTRACT_ADDRESS = process.env.URBANCOIN_CONTRACT;
