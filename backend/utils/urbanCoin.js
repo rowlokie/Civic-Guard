@@ -1,9 +1,21 @@
 // urbancoin.js
 import { ethers } from "ethers";
 import dotenv from "dotenv";
-import UrbanCoinABI from "../contract/UrbanCoinABI.json" assert { type: "json" };
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// dynamically import JSON
+const UrbanCoinABI = await import("../contract/UrbanCoinABI.json", {
+  assert: { type: "json" },
+});
+
+const abi = UrbanCoinABI.default;
+
 
 // ✅ Setup provider and wallet (admin wallet that deployed contract)
 const provider = new ethers.providers.JsonRpcProvider(process.env.AMOY_RPC_URL);
