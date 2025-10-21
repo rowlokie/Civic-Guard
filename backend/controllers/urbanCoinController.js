@@ -1,8 +1,18 @@
 import { ethers } from "ethers";
 import dotenv from "dotenv";
-import UrbanCoinABI from "../abis/UrbanCoinABI.json" assert { type: "json" };
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Safely read the ABI
+const abiPath = path.resolve(__dirname, "../abis/UrbanCoinABI.json");
+const UrbanCoinABI = JSON.parse(fs.readFileSync(abiPath, "utf8"));
+const abi = UrbanCoinABI;
 
 // setup provider & signer
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
