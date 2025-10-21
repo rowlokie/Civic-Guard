@@ -6,19 +6,26 @@ import { fileURLToPath } from "url";
 
 dotenv.config();
 
+// ESM __dirname fix
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Safely read the ABI
-const abiPath = path.resolve(__dirname, "../abis/UrbanCoinABI.json");
+// ✅ Load ABI safely (must be an array)
+const abiPath = path.join(__dirname, "../abis/UrbanCoinABI.json");
 const UrbanCoinABI = JSON.parse(fs.readFileSync(abiPath, "utf8"));
-const abi = UrbanCoinABI;
 
-// setup provider & signer
-const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+if (!Array.isArray(UrbanCoinABI)) {
+  throw new Error("❌ ABI is not an array!");
+}
+
+// ✅ Setup provider & wallet (Ethers v5)
+const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
 const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+
+// ✅ Contract instance
 const contract = new ethers.Contract(process.env.CONTRACT_ADDRESS, UrbanCoinABI, wallet);
 
+// 🎁 Reward reporter function
 export const rewardReporter = async (req, res) => {
   try {
     const { reporter, amount } = req.body;
@@ -27,7 +34,15 @@ export const rewardReporter = async (req, res) => {
       return res.status(400).json({ error: "Reporter and amount required" });
     }
 
-    // call smart contract function (reward)
+    if (!ethers.utils.isAddress(reporter)) {
+      return res.status(400).json({ error: "Invalid reporter address" });
+    }
+
+    if (Number(amount) <= 0) {
+      return res.status(400).json({ error: "Amount must be positive" });
+    }
+
+    // Call smart contract reward function
     const tx = await contract.reward(reporter, amount);
     await tx.wait();
 
@@ -38,6 +53,9 @@ export const rewardReporter = async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Reward failed:", err);
-    res.status(500).json({ error: "Reward transaction failed", details: err.message });
+    res.status(500).json({
+      error: "Reward transaction failed",
+      details: err.message,
+    });
   }
 };

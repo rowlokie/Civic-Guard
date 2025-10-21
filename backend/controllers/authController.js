@@ -5,15 +5,36 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { ethers } from 'ethers';
+import dotenv from 'dotenv';
 
-// ✅ Load JSON ABI safely (works in all Node environments)
+dotenv.config();
+
+// ESM __dirname fix
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Load ABI safely
 const abiPath = path.join(__dirname, '../abis/UrbanCoinABI.json');
 const UrbanCoinABI = JSON.parse(fs.readFileSync(abiPath, 'utf-8'));
+if (!Array.isArray(UrbanCoinABI)) throw new Error('❌ ABI is not an array!');
 
-const TOKEN_ADDRESS = "0x348a6101297a3E414144D35f7484FB21EcCD3E4E";
-const RPC_URL = "https://rpc-amoy.polygon.technology";
+const TOKEN_ADDRESS = process.env.URBANCOIN_CONTRACT || "0x348a6101297a3E414144D35f7484FB21EcCD3E4E";
+const RPC_URL = process.env.AMOY_RPC_URL || "https://rpc-amoy.polygon.technology";
+
+// ✅ Utility: Fetch real token balance from blockchain
+export const fetchRealBalance = async (walletAddress) => {
+  if (!walletAddress) return "0";
+  try {
+    const provider = new ethers.providers.JsonRpcProvider(RPC_URL); // v5 syntax
+    const contract = new ethers.Contract(TOKEN_ADDRESS, UrbanCoinABI, provider);
+    const raw = await contract.balanceOf(walletAddress);
+    const decimals = await contract.decimals();
+    return ethers.utils.formatUnits(raw, decimals); // v5 syntax
+  } catch (err) {
+    console.error("🔴 Failed to fetch on-chain balance:", err.message);
+    return "Error";
+  }
+};
 
 // ✅ Register Controller
 export const register = async (req, res) => {
@@ -96,20 +117,5 @@ export const getMe = async (req, res) => {
   } catch (err) {
     console.error("🔴 getMe error:", err);
     res.status(500).json({ error: 'Failed to fetch user profile' });
-  }
-};
-
-// ✅ Utility: Fetch real token balance from blockchain
-export const fetchRealBalance = async (walletAddress) => {
-  if (!walletAddress) return "0";
-  try {
-    const provider = new ethers.JsonRpcProvider(RPC_URL);
-    const contract = new ethers.Contract(TOKEN_ADDRESS, UrbanCoinABI, provider);
-    const raw = await contract.balanceOf(walletAddress);
-    const decimals = await contract.decimals();
-    return ethers.formatUnits(raw, decimals);
-  } catch (err) {
-    console.error("🔴 Failed to fetch on-chain balance:", err.message);
-    return "Error";
   }
 };

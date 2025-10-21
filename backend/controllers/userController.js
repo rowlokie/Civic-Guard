@@ -3,22 +3,27 @@ import { ethers } from 'ethers';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 
-// Get current directory path (since __dirname is not available in ES modules)
+dotenv.config();
+
+// ESM __dirname fix
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Read ABI file safely
-const abiPath = path.resolve(__dirname, '../abis/UrbanCoinABI.json');
+// Load ABI safely (must be an array)
+const abiPath = path.join(__dirname, '../abis/UrbanCoinABI.json');
 const UrbanCoinABI = JSON.parse(fs.readFileSync(abiPath, 'utf8'));
-const abi = UrbanCoinABI;
+if (!Array.isArray(UrbanCoinABI)) throw new Error('❌ ABI is not an array!');
 
+// Setup provider & contract (Ethers v5)
 const RPC_URL = process.env.AMOY_RPC_URL;
 const CONTRACT_ADDRESS = process.env.URBANCOIN_CONTRACT;
 
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
 const contract = new ethers.Contract(CONTRACT_ADDRESS, UrbanCoinABI, provider);
 
+// Leaderboard API
 export const getLeaderboard = async (req, res) => {
   try {
     const users = await User.find({ walletAddress: { $exists: true, $ne: "" } });
@@ -42,6 +47,7 @@ export const getLeaderboard = async (req, res) => {
 
     const filtered = balances.filter(u => u !== null);
 
+    // Sort descending by balance
     filtered.sort((a, b) => b.realBalance - a.realBalance);
 
     res.json(filtered.slice(0, 10));
