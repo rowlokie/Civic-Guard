@@ -19,7 +19,7 @@ function Login() {
     setError("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", form);
+      const res = await axios.post("https://civic-guard-3tds.onrender.com/api/auth/login", form);
 const user = res.data; // includes token + user info
 localStorage.setItem("user", JSON.stringify(user));
 

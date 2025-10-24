@@ -11,7 +11,7 @@ const Coupons = () => {
   useEffect(() => {
     const fetchCoupons = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/coupons", {
+        const res = await axios.get("https://civic-guard-3tds.onrender.com/api/coupons", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setCoupons(res.data);
@@ -27,7 +27,7 @@ const Coupons = () => {
   const claimCoupon = async (id) => {
     try {
       const res = await axios.post(
-        `http://localhost:5000/api/coupons/claim/${id}`,
+        `https://civic-guard-3tds.onrender.com/api/coupons/claim/${id}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

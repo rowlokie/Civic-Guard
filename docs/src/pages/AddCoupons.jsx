@@ -20,7 +20,7 @@ const AdminCoupons = () => {
 
   const createCoupon = async () => {
     try {
-      await axios.post("http://localhost:5000/api/coupons", form, {
+      await axios.post("https://civic-guard-3tds.onrender.com/api/coupons", form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Coupon created!");

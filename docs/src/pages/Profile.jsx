@@ -39,7 +39,7 @@ const ProfilePage = () => {
     }
 
     try {
-      const response = await axios.get('http://localhost:5000/api/auth/me', {
+      const response = await axios.get('https://civic-guard-3tds.onrender.com/api/auth/me', {
         headers: { Authorization: `Bearer ${storedUser.token}` },
       });
       setUser(response.data);
@@ -94,7 +94,7 @@ const ProfilePage = () => {
       const storedUserRaw = localStorage.getItem('user');
       const storedUser = storedUserRaw ? JSON.parse(storedUserRaw) : null;
       if (storedUser?.token) {
-        await axios.post('http://localhost:5000/api/auth/update-wallet', { walletAddress }, {
+        await axios.post('https://civic-guard-3tds.onrender.com/api/auth/update-wallet', { walletAddress }, {
           headers: { Authorization: `Bearer ${storedUser.token}` }
         });
       }
