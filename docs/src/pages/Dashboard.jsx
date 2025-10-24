@@ -5,7 +5,7 @@ import { ComplaintsList } from "./dashboardcomp/ComplaintsLists";
 import CivicMap from "./dashboardcomp/CivicMap";
 import { AlertTriangle, CheckCircle, Shield, FileText, MapPin, Filter, Download } from "lucide-react";
 
-const Index = () => {
+const Dashboard = () => {
   const [issues, setIssues] = useState([]);
   const [regions, setRegions] = useState({ cities: [], areas: [], suburbs: [], streets: [] });
   const [filters, setFilters] = useState({
@@ -17,13 +17,15 @@ const Index = () => {
   const [selectedMapRegion, setSelectedMapRegion] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         const [issuesRes, regionsRes] = await Promise.all([
-          axios.get("/api/issues"),
-          axios.get("/api/issues/regions")
+          axios.get(`${BACKEND_URL}/api/issues`),
+          axios.get(`${BACKEND_URL}/api/issues/regions`)
         ]);
         setIssues(issuesRes.data);
         setRegions(regionsRes.data);
@@ -34,7 +36,7 @@ const Index = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [BACKEND_URL]);
 
   const applyFilters = async (newFilters) => {
     try {
@@ -45,14 +47,12 @@ const Index = () => {
         params.append("regionType", newFilters.regionType);
         params.append("regionName", newFilters.regionName);
       }
-
       if (newFilters.type !== "all") params.append("type", newFilters.type);
       if (newFilters.status !== "all") params.append("status", newFilters.status);
 
-      const res = await axios.get(`/api/issues?${params}`);
+      const res = await axios.get(`${BACKEND_URL}/api/issues?${params}`);
       setIssues(res.data);
       setFilters(newFilters);
-      // Clear map selection when filters change
       setSelectedMapRegion(null);
     } catch (err) {
       console.error("Error applying filters:", err);
@@ -64,19 +64,9 @@ const Index = () => {
   const handleMapRegionSelect = (regionName) => {
     setSelectedMapRegion(regionName);
     if (regionName) {
-      // Apply filter when region is selected on map
-      applyFilters({
-        ...filters,
-        regionType: "area",
-        regionName: regionName
-      });
+      applyFilters({ ...filters, regionType: "area", regionName });
     } else {
-      // Clear area filter when region is deselected
-      applyFilters({
-        ...filters,
-        regionType: "all",
-        regionName: "all"
-      });
+      applyFilters({ ...filters, regionType: "all", regionName: "all" });
     }
   };
 
@@ -136,7 +126,7 @@ const Index = () => {
 
         {/* Filters */}
         <div className="bg-opacity-10 bg-slate-500 border-white border-[1px] rounded-lg p-4 shadow-md">
-          <div className="flex items-center  gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-4">
             <Filter size={20} className="text-purple-600" />
             <h2 className="text-lg font-semibold">Filter Complaints</h2>
             {selectedMapRegion && (
@@ -152,8 +142,8 @@ const Index = () => {
               </span>
             )}
           </div>
-          <div className="grid grid-cols-1  md:grid-cols-4 gap-4">
-            {/* Region Type */}
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm pb-1 font-medium mb-1">Region Type</label>
               <select
@@ -169,7 +159,6 @@ const Index = () => {
               </select>
             </div>
 
-            {/* Region Name */}
             <div>
               <label className="block text-sm pb-1 font-medium mb-1">Region Name</label>
               <select
@@ -179,13 +168,12 @@ const Index = () => {
                 disabled={filters.regionType === "all"}
               >
                 <option value="all">All</option>
-                {getRegionOptions().map(region => (
-                  <option key={region} value={region}>{region || "Unknown"}</option>
+                {getRegionOptions().map((region, idx) => (
+                  <option key={region || idx} value={region}>{region || "Unknown"}</option>
                 ))}
               </select>
             </div>
 
-            {/* Issue Type */}
             <div>
               <label className="block text-sm pb-1 font-medium mb-1">Issue Type</label>
               <select
@@ -203,7 +191,6 @@ const Index = () => {
               </select>
             </div>
 
-            {/* Status */}
             <div> 
               <label className="block text-sm pb-1 font-medium mb-1">Status</label>
               <select
@@ -220,11 +207,15 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Main Grid - Map and Complaints Side by Side */}
-       
+        {/* Main Grid - Map + Complaints */}
+        <div className="grid md:grid-cols-2 gap-4">
+          <CivicMap 
+            issues={issues} 
+            selectedRegion={selectedMapRegion} 
+            onRegionSelect={handleMapRegionSelect} 
+          />
 
-          {/* Complaints List */}
-          <div className=" rounded-lg shadow-md ">
+          <div className="rounded-lg shadow-md p-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Recent Complaints</h2>
               <span className="bg-purple-100 text-purple-800 text-sm px-2 py-1 rounded-full">
@@ -238,8 +229,8 @@ const Index = () => {
           </div>
         </div>
       </div>
-  
+    </div>
   );
 };
 
-export default Index;
+export default Dashboard;
