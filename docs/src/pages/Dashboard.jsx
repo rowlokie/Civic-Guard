@@ -17,8 +17,9 @@ const Dashboard = () => {
   const [selectedMapRegion, setSelectedMapRegion] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://civic-guard-3tds.onrender.com/";
 
+  // Fetch issues and regions
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -27,10 +28,12 @@ const Dashboard = () => {
           axios.get(`${BACKEND_URL}/api/issues`),
           axios.get(`${BACKEND_URL}/api/issues/regions`)
         ]);
-        setIssues(issuesRes.data);
-        setRegions(regionsRes.data);
+
+        setIssues(Array.isArray(issuesRes.data) ? issuesRes.data : []);
+        setRegions(regionsRes.data || { cities: [], areas: [], suburbs: [], streets: [] });
       } catch (err) {
         console.error("Error fetching data:", err);
+        setIssues([]);
       } finally {
         setLoading(false);
       }
@@ -38,6 +41,7 @@ const Dashboard = () => {
     fetchData();
   }, [BACKEND_URL]);
 
+  // Apply filters
   const applyFilters = async (newFilters) => {
     try {
       setLoading(true);
@@ -51,16 +55,18 @@ const Dashboard = () => {
       if (newFilters.status !== "all") params.append("status", newFilters.status);
 
       const res = await axios.get(`${BACKEND_URL}/api/issues?${params}`);
-      setIssues(res.data);
+      setIssues(Array.isArray(res.data) ? res.data : []);
       setFilters(newFilters);
       setSelectedMapRegion(null);
     } catch (err) {
       console.error("Error applying filters:", err);
+      setIssues([]);
     } finally {
       setLoading(false);
     }
   };
 
+  // Map region selection
   const handleMapRegionSelect = (regionName) => {
     setSelectedMapRegion(regionName);
     if (regionName) {
@@ -70,6 +76,7 @@ const Dashboard = () => {
     }
   };
 
+  // Get region options for select
   const getRegionOptions = () => {
     switch (filters.regionType) {
       case "city": return regions.cities;
@@ -80,11 +87,13 @@ const Dashboard = () => {
     }
   };
 
+  // Safe metrics calculation
   const metrics = useMemo(() => {
-    const total = issues.length;
-    const resolved = issues.filter(c => c.status === "Resolved").length;
-    const verified = issues.filter(c => c.status === "Verified").length;
-    const pending = issues.filter(c => c.status === "Pending").length;
+    const arr = Array.isArray(issues) ? issues : [];
+    const total = arr.length;
+    const resolved = arr.filter(c => c.status === "Resolved").length;
+    const verified = arr.filter(c => c.status === "Verified").length;
+    const pending = arr.filter(c => c.status === "Pending").length;
     return { total, resolved, verified, pending };
   }, [issues]);
 
@@ -103,7 +112,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
           <div className="space-y-2">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-500 to-yellow-400 
                          bg-clip-text text-transparent [text-shadow:_0_0_10px_rgba(168,85,247,0.8),_0_0_20px_rgba(236,72,153,0.6)]">
@@ -111,7 +120,7 @@ const Dashboard = () => {
             </h1>
             <p className="text-muted-foreground">Monitor and track municipal complaints across the city</p>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+          <button className="flex items-center gap-2 mt-4 md:mt-0 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
             <Download size={18} /> Export Data
           </button>
         </div>
@@ -126,7 +135,7 @@ const Dashboard = () => {
 
         {/* Filters */}
         <div className="bg-opacity-10 bg-slate-500 border-white border-[1px] rounded-lg p-4 shadow-md">
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-4 flex-wrap">
             <Filter size={20} className="text-purple-600" />
             <h2 className="text-lg font-semibold">Filter Complaints</h2>
             {selectedMapRegion && (
