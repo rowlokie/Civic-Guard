@@ -78,6 +78,13 @@ function Navbar() {
           </Link>
         </div>
       )}
+
+      {/* Pixel Decorations at the end */}
+      <div className="absolute top-1/2 right-4 flex space-x-1 transform -translate-y-1/2">
+        <div className="w-2 h-2 bg-pink-400 rounded-sm animate-pulse"></div>
+        <div className="w-2 h-2 bg-yellow-400 rounded-sm animate-pulse delay-75"></div>
+        <div className="w-2 h-2 bg-green-400 rounded-sm animate-pulse delay-150"></div>
+      </div>
     </nav>
   );
 }
