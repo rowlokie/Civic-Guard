@@ -3,77 +3,65 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Coins, Trophy } from "lucide-react";
 
-// Trophy colors
+// Helper: trophy color and glow
 const getTrophyColor = (rank) => {
-  if (rank === 1) return "text-yellow-400"; // gold
-  if (rank === 2) return "text-gray-300";   // silver
-  if (rank === 3) return "text-amber-600";  // bronze
-  return "text-muted-foreground";
+  if (rank === 1) return "text-yellow-400";
+  if (rank === 2) return "text-gray-300";
+  if (rank === 3) return "text-amber-600";
+  return "text-purple-400";
+};
+const getGlow = (rank) => {
+  if (rank === 1) return "shadow-[0_0_25px_rgba(255,215,0,0.6)]";
+  if (rank === 2) return "shadow-[0_0_25px_rgba(200,200,200,0.5)]";
+  if (rank === 3) return "shadow-[0_0_25px_rgba(255,160,0,0.4)]";
+  return "hover:shadow-[0_0_15px_rgba(147,51,234,0.3)]";
 };
 
-// Trophy glow for icon
-const getTrophyGlow = (rank) => {
-  if (rank === 1) return "drop-shadow-[0_0_10px_rgb(255,215,0)]";
-  if (rank === 2) return "drop-shadow-[0_0_10px_rgb(192,192,192)]";
-  if (rank === 3) return "drop-shadow-[0_0_10px_rgb(205,127,50)]";
-  return "";
-};
-
-// Card for each player
+// Single player card
 const PlayerCard = ({ player, rank }) => {
   const isTopThree = rank <= 3;
 
-  // Card glow class based on rank
-  const glowClass =
-    rank === 1
-      ? "glow-gold"
-      : rank === 2
-      ? "glow-silver"
-      : rank === 3
-      ? "glow-bronze"
-      : "hover:shadow-sm";
-
   return (
     <Card
-      className={`bg-card border-0  transition-all duration-300 
-                  hover:scale-[1.02] ${glowClass} 
-                  ${isTopThree ? "ring-2 ring-primary/50" : ""}`}
+      className={`relative bg-gradient-to-br from-purple-900/60 to-blue-900/60 backdrop-blur-lg 
+                  p-6 rounded-2xl border-2 transition-all duration-300 transform hover:scale-[1.02]
+                  ${getGlow(rank)} ${isTopThree ? "border-yellow-400/70" : "border-purple-500/40"}`}
     >
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {/* Rank + Trophy */}
-            <div className="flex items-center gap-2">
-              <span
-                className={`text-2xl font-bold ${getTrophyColor(rank)}`}
-              >
-                {rank}
-              </span>
-              {isTopThree && (
-                <Trophy
-                  className={`w-6 h-6 ${getTrophyColor(rank)} ${getTrophyGlow(rank)}`}
-                />
-              )}
-            </div>
+      {isTopThree && (
+        <div className="absolute -top-3 -right-3">
+          <div className="bg-gradient-to-br from-yellow-500 to-amber-600 w-12 h-12 rounded-full 
+                          flex items-center justify-center text-xl font-bold shadow-lg">
+            {rank === 1 ? "🥇" : rank === 2 ? "🥈" : "🥉"}
+          </div>
+        </div>
+      )}
 
-            {/* Avatar */}
-            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+      <CardContent className="p-0">
+        <div className="flex items-center justify-between">
+          {/* Left: rank, avatar, name */}
+          <div className="flex items-center space-x-4">
+            <div className="text-2xl font-bold text-purple-300 w-8">#{rank}</div>
+            <div className="w-14 h-14 rounded-full bg-purple-800/40 flex items-center justify-center border border-purple-500/30">
               <img
                 src={player.avatar || "/default-avatar.png"}
-                alt={`${player.name} avatar`}
-                className="w-10 h-10 rounded-full object-cover"
+                alt="avatar"
+                className="w-12 h-12 rounded-full object-cover"
               />
             </div>
-
-            {/* Name + Email */}
             <div>
-              <h3 className="font-semibold text-foreground">{player.name}</h3>
-              <p className="text-sm text-muted-foreground">{player.email}</p>
+              <h3 className="text-xl font-bold text-white">{player.name}</h3>
+              <p className="text-sm text-purple-300">{player.city || player.email}</p>
             </div>
           </div>
 
-          {/* Coins */}
-          <div className="flex items-center gap-2">
+          {/* Right: level, coins */}
+          <div className="text-right flex flex-col items-end gap-2">
+            <div
+              className="text-2xl font-bold text-transparent bg-clip-text 
+                         bg-gradient-to-r from-yellow-300 to-amber-400"
+            >
+              Level {player.level || Math.floor(player.realBalance / 100)}
+            </div>
             <Badge
               variant="secondary"
               className="bg-primary text-primary-foreground text-lg font-bold px-3 py-1 flex items-center gap-1"
@@ -88,83 +76,76 @@ const PlayerCard = ({ player, rank }) => {
   );
 };
 
-const Leaderboard = () => {
+const LeaderboardPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const res = await fetch("https://civic-guard-3tds.onrender.com/api/leaderboard");
+        const res = await fetch(
+          "https://civic-guard-3tds.onrender.com/api/leaderboard"
+        );
         const data = await res.json();
         setUsers(data || []);
       } catch (err) {
-        console.error("❌ Failed to fetch leaderboard:", err);
+        console.error("Failed to fetch leaderboard:", err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchLeaderboard();
   }, []);
 
-  if (loading) {
+  if (loading)
     return (
-      <div className="min-h-screen flex justify-center items-center text-muted-foreground">
-        Loading leaderboard...
+      <div className="min-h-screen flex justify-center items-center text-purple-300 text-xl">
+        ⚙️ Loading the Guardian leaderboard...
       </div>
     );
-  }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0015] via-[#120026] to-[#1b0038] text-white p-6">
+      <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Coins className="w-8 h-8 text-primary  animate-coin-bounce" />
-            <h1
-              className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-500 to-yellow-400 
-                         bg-clip-text text-transparent [text-shadow:_0_0_10px_rgba(168,85,247,0.8),_0_0_20px_rgba(236,72,153,0.6)]"
-            >
-              UrbanCoin Leaderboard
-            </h1>
-          </div>
-          <p className="text-muted-foreground text-lg">
-            Compete with others and climb to the top!
+        <div className="text-center mb-10">
+          <h1 className="text-5xl font-extrabold bg-gradient-to-r from-purple-400 via-pink-500 to-yellow-400 
+                         bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(168,85,247,0.7)]">
+            🛡️ CivicGuardian Leaderboard
+          </h1>
+          <p className="text-purple-300 mt-3">
+            Compete. Contribute. Rise through the ranks of Guardians.
           </p>
         </div>
 
-        {/* Leaderboard List */}
-        <div className="space-y-3 border-0">
-          {users.map((player, index) => (
-            <PlayerCard  key={player._id} player={player} rank={index + 1} />
+        {/* List of players */}
+        <div className="space-y-5">
+          {users.map((player, i) => (
+            <PlayerCard key={player._id} player={player} rank={i + 1} />
           ))}
         </div>
 
-        {/* Stats footer */}
-        <div
-          className="mt-6 p-4 rounded-xl border border-border 
-                     bg-card shadow-md backdrop-blur-sm"
-        >
-          <div className="grid grid-cols-3 md:grid-cols-3 gap-4 text-center">
+        {/* Footer stats */}
+        <div className="mt-10 bg-gradient-to-r from-purple-900/40 to-blue-900/40 border border-purple-700/40 
+                        p-6 rounded-2xl shadow-lg backdrop-blur-sm">
+          <div className="grid grid-cols-3 text-center gap-6">
             <div>
-              <p className="text-2xl font-bold text-primary">{users.length}</p>
-              <p className="text-muted-foreground">Active Players</p>
+              <p className="text-2xl font-bold text-yellow-400">{users.length}</p>
+              <p className="text-purple-300">Active Guardians</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-secondary">
+              <p className="text-2xl font-bold text-amber-400">
                 {users.reduce((sum, p) => sum + p.realBalance, 0).toLocaleString()}
               </p>
-              <p className="text-muted-foreground">Total Coins</p>
+              <p className="text-purple-300">Total XP Earned</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">
+              <p className="text-2xl font-bold text-pink-400">
                 {Math.round(
                   users.reduce((sum, p) => sum + p.realBalance, 0) / users.length || 0
                 )}
               </p>
-              <p className="text-muted-foreground">Average Score</p>
+              <p className="text-purple-300">Average XP</p>
             </div>
           </div>
         </div>
@@ -173,4 +154,4 @@ const Leaderboard = () => {
   );
 };
 
-export default Leaderboard;
+export default LeaderboardPage;
