@@ -26,12 +26,12 @@ const MUMBAI_AREAS_GEOJSON = {
   ]
 };
 
-// Color scale for complaint density - updated to purple theme
+// Original color scale for complaint density
 const getAreaColor = (count) => {
-  if (count >= 10) return "#dc2626"; // Red for high density
-  if (count >= 5) return "#f59e0b";  // Orange for medium density
-  if (count >= 1) return "#8b5cf6";  // Purple for low density
-  return "#4c1d95";                  // Dark purple for no complaints
+  if (count >= 10) return "#dc2626"; // Red
+  if (count >= 5) return "#f59e0b";  // Orange
+  if (count >= 1) return "#2563eb";  // Blue
+  return "#e5e7eb";                  // Gray
 };
 
 // Opacity scale based on number of complaints
@@ -82,9 +82,8 @@ const CivicMap = ({ issues = [], onRegionSelect, selectedRegion }) => {
     return {
       fillColor: getAreaColor(count),
       fillOpacity: isHovered || isSelected ? 1 : getOpacity(count),
-      color: isSelected || isHovered ? "#ffffff" : "#c084fc",
-      weight: isSelected || isHovered ? 4 : 2,
-      opacity: isSelected || isHovered ? 1 : 0.8,
+      color: isSelected || isHovered ? "#000" : "#666",
+      weight: isSelected || isHovered ? 3 : 1,
     };
   };
 
@@ -99,13 +98,9 @@ const CivicMap = ({ issues = [], onRegionSelect, selectedRegion }) => {
     });
 
     const count = areaComplaints[areaName] || 0;
-    layer.bindTooltip(
-      `<div class="bg-gradient-to-br from-purple-900/90 to-blue-900/90 backdrop-blur-lg text-white px-3 py-2 rounded-lg border border-purple-500/50 shadow-lg">
-         <strong>${areaName}</strong><br>
-         ${count} complaint${count !== 1 ? "s" : ""}
-       </div>`,
-      { sticky: true, className: "custom-tooltip" }
-    );
+    layer.bindTooltip(`${areaName}: ${count} complaint${count !== 1 ? "s" : ""}`, {
+      sticky: true
+    });
   };
 
   // Areas without GeoJSON
@@ -140,12 +135,12 @@ const CivicMap = ({ issues = [], onRegionSelect, selectedRegion }) => {
           zoom={11} 
           scrollWheelZoom 
           className="h-full w-full"
-          style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e40af 100%)' }}
+          style={{ background: '#f8fafc' }} // Light background for map
         >
-          {/* Dark theme tile layer */}
+          {/* Original light theme tile layer */}
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution="&copy; OpenStreetMap contributors"
           />
 
           {/* GeoJSON areas */}
@@ -155,34 +150,23 @@ const CivicMap = ({ issues = [], onRegionSelect, selectedRegion }) => {
           {fallbackAreas.map(({ area, count, coordinates }) => {
             const isSelected = selectedRegion === area;
             const isHovered = hoveredArea === area;
-            const radius = 8 + Math.log(count + 1) * 2;
-            
             return (
               <CircleMarker
                 key={area}
                 center={coordinates}
-                radius={radius}
-                color={isSelected || isHovered ? "#ffffff" : getAreaColor(count)}
+                radius={8 + Math.log(count + 1) * 2}
+                color={isSelected || isHovered ? "#000" : getAreaColor(count)}
                 fillColor={getAreaColor(count)}
-                fillOpacity={isSelected || isHovered ? 0.9 : getOpacity(count)}
-                weight={isSelected || isHovered ? 3 : 2}
-                opacity={isSelected || isHovered ? 1 : 0.8}
+                fillOpacity={isSelected || isHovered ? 1 : getOpacity(count)}
+                weight={isSelected || isHovered ? 3 : 1}
                 eventHandlers={{
                   click: () => onRegionSelect && onRegionSelect(selectedRegion === area ? undefined : area),
                   mouseover: () => setHoveredArea(area),
                   mouseout: () => setHoveredArea(undefined),
                 }}
               >
-                <Tooltip 
-                  direction="top" 
-                  offset={[0, -10]} 
-                  opacity={1} 
-                  permanent={isHovered || isSelected}
-                  className="custom-tooltip"
-                >
-                  <div className="bg-gradient-to-br from-purple-900/90 to-blue-900/90 backdrop-blur-lg text-white px-3 py-2 rounded-lg border border-purple-500/50 shadow-lg text-xs font-semibold">
-                    {area}: {count} complaint{count !== 1 ? "s" : ""}
-                  </div>
+                <Tooltip direction="top" offset={[0, -5]} opacity={1} permanent={isHovered || isSelected}>
+                  <div className="text-xs font-semibold">{area}: {count} complaint{count !== 1 ? "s" : ""}</div>
                 </Tooltip>
               </CircleMarker>
             );
@@ -193,7 +177,7 @@ const CivicMap = ({ issues = [], onRegionSelect, selectedRegion }) => {
       {/* Legend */}
       <div className="flex flex-wrap gap-4 mt-4 text-xs text-purple-300">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-[#8b5cf6] rounded"></div>
+          <div className="w-3 h-3 bg-[#2563eb] rounded"></div>
           <span>1-4 complaints</span>
         </div>
         <div className="flex items-center gap-2">
@@ -205,26 +189,6 @@ const CivicMap = ({ issues = [], onRegionSelect, selectedRegion }) => {
           <span>10+ complaints</span>
         </div>
       </div>
-
-      <style>{`
-        .custom-tooltip .leaflet-tooltip {
-          background: transparent;
-          border: none;
-          box-shadow: none;
-        }
-        .leaflet-tooltip-top:before {
-          border-top-color: rgba(168, 85, 247, 0.5);
-        }
-        .leaflet-tooltip-bottom:before {
-          border-bottom-color: rgba(168, 85, 247, 0.5);
-        }
-        .leaflet-tooltip-left:before {
-          border-left-color: rgba(168, 85, 247, 0.5);
-        }
-        .leaflet-tooltip-right:before {
-          border-right-color: rgba(168, 85, 247, 0.5);
-        }
-      `}</style>
     </div>
   );
 };

@@ -287,7 +287,7 @@ const Dashboard = () => {
             />
           </div>
 
-          <div className="bg-gradient-to-br from-purple-900/60 to-blue-900/60 backdrop-blur-lg rounded-2xl border-2 border-purple-500/30 p-6 shadow-xl">
+          <div className="bg-gradient-to-br from-purple-900/60 to-blue-900/60 backdrop-blur-lg rounded-2xl border-2 border-purple-500/30 pt-6 shadow-xl">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-white">Recent Complaints</h2>
               <span className="bg-purple-600/30 text-purple-300 text-sm px-3 py-1 rounded-full border border-purple-500/50">
