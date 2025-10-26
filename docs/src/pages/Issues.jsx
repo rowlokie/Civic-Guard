@@ -1,22 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { MapPin, CheckCircle } from "lucide-react";
 import axios from "axios";
 
 const Issues = () => {
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("All");
+  const [selectedFilter, setSelectedFilter] = useState("All");
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
 
@@ -70,7 +60,7 @@ const Issues = () => {
 
   // Filter issues
   const filteredIssues =
-    filter === "All" ? issues : issues.filter((issue) => issue.status === filter);
+    selectedFilter === "All" ? issues : issues.filter((issue) => issue.status === selectedFilter);
 
   // Update status for admin
   const updateStatus = async (id, newStatus) => {
@@ -102,130 +92,121 @@ const Issues = () => {
     }
   };
 
-  // Badge colors
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Verified":
-        return "bg-purple-600 text-white";
-      case "Resolved":
-        return "bg-emerald-600 text-white";
-      case "Pending":
-        return "bg-red-700 text-white animate-pulse";
-      default:
-        return "bg-muted text-muted-foreground";
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-background  p-4 md:p-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-primary tracking-tight">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-blue-300">
           All Reported Issues
         </h1>
-        <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-48 border-0  rounded-lg bg-card text-foreground shadow-sm">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="All">All</SelectItem>
-            <SelectItem value="Pending">Pending</SelectItem>
-            <SelectItem value="Verified">Verified</SelectItem>
-            <SelectItem value="Resolved">Resolved</SelectItem>
-          </SelectContent>
-        </Select>
+        
+        <div className="relative">
+          <select
+            value={selectedFilter}
+            onChange={(e) => setSelectedFilter(e.target.value)}
+            className="bg-gradient-to-br from-purple-900/60 to-blue-900/60 backdrop-blur-lg text-white border-2 border-purple-500/50 rounded-xl px-6 py-3 pr-12 font-medium focus:outline-none focus:border-purple-500 appearance-none cursor-pointer"
+          >
+            <option value="All">All</option>
+            <option value="Pending">Pending</option>
+            <option value="Verified">Verified</option>
+            <option value="Resolved">Resolved</option>
+          </select>
+          <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-purple-300">
+            ▼
+          </div>
+        </div>
       </div>
 
       {/* Error */}
       {error && (
-        <p className="text-center text-red-600 font-medium mb-4">{error}</p>
+        <p className="text-center text-red-400 font-medium mb-4">{error}</p>
       )}
 
       {/* Issues Grid */}
       {loading ? (
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2" />
-          <p className="text-muted-foreground text-lg">Loading issues...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-2" />
+          <p className="text-purple-300 text-lg">Loading issues...</p>
         </div>
       ) : filteredIssues.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground text-lg">
+          <p className="text-purple-300 text-lg">
             No issues found for the selected filter.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredIssues.map((issue) => (
-            <Card
+            <div
               key={issue._id}
-              className="bg-card border-1 border-blue-600 rounded-xl overflow-hidden shadow-md hover:shadow-glow transition-all duration-300 group"
+              className="bg-gradient-to-br from-purple-900/60 to-blue-900/60 backdrop-blur-lg rounded-2xl overflow-hidden border-2 border-purple-500/30 hover:border-purple-500 transition-all duration-300 hover:scale-105 shadow-xl"
             >
               {/* Image */}
               {issue.imageUrl && (
-                <div className="aspect-video overflow-hidden">
+                <div className="relative h-64 overflow-hidden">
                   <img
                     src={issue.imageUrl}
-                    alt={`${issue.type} issue`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    alt={issue.type}
+                    className="w-full h-full object-cover"
                   />
+                  <div className="absolute top-4 right-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-lg ${
+                      issue.status === 'Resolved' 
+                        ? 'bg-green-600 text-white' 
+                        : issue.status === 'Verified'
+                        ? 'bg-purple-600 text-white'
+                        : 'bg-yellow-600 text-white'
+                    }`}>
+                      {issue.status === 'Resolved' && '✓ '}
+                      {issue.status}
+                    </span>
+                  </div>
                 </div>
               )}
-
-              <CardContent className="p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold capitalize">
-                    {issue.type}
-                  </h3>
-                  <Badge className={getStatusColor(issue.status)}>
-                    {issue.status === "Resolved" && (
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                    )}
-                    {issue.status}
-                  </Badge>
-                </div>
-
-                <div className="flex items-start gap-2 text-muted-foreground">
-                  <MapPin className="w-4 h-4 mt-0.5" />
-                  <span className="text-sm">
+              
+              <div className="p-5">
+                <h3 className="text-xl font-bold text-white mb-3 capitalize">{issue.type}</h3>
+                
+                <div className="flex items-start space-x-2 mb-3">
+                  <MapPin className="w-4 h-4 text-purple-300 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-purple-200 line-clamp-2">
                     {issue.location?.address || "Location not provided"}
-                  </span>
+                  </p>
                 </div>
-
-                <p className="text-sm text-foreground">{issue.description}</p>
-
+                
+                <p className="text-sm text-purple-300 mb-4">{issue.description}</p>
+                
                 {/* Admin Buttons */}
                 {isAdmin && issue.status !== "Resolved" && (
                   <div className="flex gap-2">
                     {issue.status !== "Verified" && (
-                      <Button
+                      <button
                         onClick={() => updateStatus(issue._id, "Verified")}
-                        className="flex-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white"
+                        className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
                       >
                         Verify
-                      </Button>
+                      </button>
                     )}
-                    <Button
+                    <button
                       onClick={() => updateStatus(issue._id, "Resolved")}
-                      className="flex-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white"
+                      className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
                     >
                       Resolve
-                    </Button>
+                    </button>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       )}
 
-      {/* ➕ Add New Issue Button */}
+      {/* Add New Issue Button */}
       <Link
         to="/report"
-        className="fixed bottom-4 right-6 bg-primary text-primary-foreground 
-                   text-3xl rounded-full w-14 h-14 flex items-center justify-center 
-                   shadow-lg hover:rotate-90 hover:scale-110 transition-transform duration-300"
-        title="Report New Issue"
-      ><div className="top-1">+</div>
+        className="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-full shadow-2xl shadow-purple-500/50 flex items-center justify-center text-3xl font-bold transition-all duration-300 hover:scale-110"
+      >
+        +
       </Link>
     </div>
   );

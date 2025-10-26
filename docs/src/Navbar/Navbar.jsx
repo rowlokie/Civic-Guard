@@ -40,8 +40,8 @@ function Navbar() {
         </Link>
       </div>
 
-      {/* Desktop Profile Button + Pixel Texture */}
-      <div className="hidden md:flex items-center gap-4">
+      {/* Desktop Profile Button */}
+      <div className="hidden md:block">
         <Link to="/profile">
           <Button className="relative bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 border-0 text-white" size="sm">
             <User className="w-4 h-4 mr-1" />
@@ -49,36 +49,6 @@ function Navbar() {
             <Badge className="absolute -top-2 -right-2 bg-green-400 text-green-900 px-1 py-0 text-xs">7</Badge>
           </Button>
         </Link>
-        
-        {/* Pixelated Texture */}
-        <div className="w-16 h-12 relative overflow-hidden rounded-lg border-2 border-purple-400/50 bg-purple-800">
-          {/* Pixel Grid */}
-          <div className="absolute inset-0 grid grid-cols-4 grid-rows-3 gap-[1px] p-1">
-            {/* Row 1 */}
-            <div className="bg-purple-300 rounded-[1px]"></div>
-            <div className="bg-purple-500 rounded-[1px]"></div>
-            <div className="bg-purple-300 rounded-[1px]"></div>
-            <div className="bg-purple-600 rounded-[1px]"></div>
-            
-            {/* Row 2 */}
-            <div className="bg-purple-600 rounded-[1px]"></div>
-            <div className="bg-purple-400 rounded-[1px]"></div>
-            <div className="bg-purple-500 rounded-[1px]"></div>
-            <div className="bg-purple-300 rounded-[1px]"></div>
-            
-            {/* Row 3 */}
-            <div className="bg-purple-400 rounded-[1px]"></div>
-            <div className="bg-purple-600 rounded-[1px]"></div>
-            <div className="bg-purple-300 rounded-[1px]"></div>
-            <div className="bg-purple-500 rounded-[1px]"></div>
-          </div>
-          
-          {/* Pixel Border Effect */}
-          <div className="absolute inset-0 border-2 border-purple-200/20 rounded-lg pointer-events-none"></div>
-          
-          {/* Glow Effect */}
-          <div className="absolute inset-0 rounded-lg shadow-[inset_0_0_10px_rgba(192,132,252,0.3)] pointer-events-none"></div>
-        </div>
       </div>
 
       {/* Mobile Hamburger */}
