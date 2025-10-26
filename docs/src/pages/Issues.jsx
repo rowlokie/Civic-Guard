@@ -139,7 +139,7 @@ const Issues = () => {
           {filteredIssues.map((issue) => (
             <div
               key={issue._id}
-              className="bg-gradient-to-br from-purple-900/60 to-blue-900/60 backdrop-blur-lg rounded-2xl overflow-hidden border-2 border-purple-500/30 hover:border-pink-500 transition-all duration-300 hover:scale-105 shadow-xl"
+              className="bg-gradient-to-br from-purple-900/60 to-blue-900/60 backdrop-blur-lg rounded-2xl overflow-hidden border-2 border-purple-500/30 hover:border-purple-500 transition-all duration-300 hover:scale-105 shadow-xl"
             >
               {/* Image */}
               {issue.imageUrl && (
