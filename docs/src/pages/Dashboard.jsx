@@ -99,52 +99,113 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-950 via-purple-950 to-blue-950">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading dashboard data...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto"></div>
+          <p className="mt-4 text-purple-300">Loading dashboard data...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-blue-950 relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="fixed inset-0 opacity-20">
+        <div className="absolute top-20 left-20 w-96 h-96 bg-purple-500 rounded-full filter blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-blue-500 rounded-full filter blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500 rounded-full filter blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
+
+      {/* Twinkling Stars */}
+      <div className="fixed inset-0 pointer-events-none">
+        {[...Array(50)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-white rounded-full animate-twinkle"
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`
+            }}
+          ></div>
+        ))}
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-          <div className="space-y-2">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-500 to-yellow-400 
-                         bg-clip-text text-transparent [text-shadow:_0_0_10px_rgba(168,85,247,0.8),_0_0_20px_rgba(236,72,153,0.6)]">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-blue-300">
               Civic Complaints Dashboard
             </h1>
-            <p className="text-muted-foreground">Monitor and track municipal complaints across the city</p>
+            <p className="text-purple-300 mt-2">Monitor and track municipal complaints across the city</p>
           </div>
-          <button className="flex items-center gap-2 mt-4 md:mt-0 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+          <button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2">
             <Download size={18} /> Export Data
           </button>
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <KPICard title="Total Complaints" value={metrics.total} icon={FileText} description="Active complaints in system" />
-          <KPICard title="Resolved" value={metrics.resolved} icon={CheckCircle} variant="success" description="Successfully resolved" />
-          <KPICard title="Verified" value={metrics.verified} icon={Shield} variant="default" description="Verified by authorities" />
-          <KPICard title="Pending" value={metrics.pending} icon={AlertTriangle} variant="warning" description="Awaiting action" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-gradient-to-br from-purple-900/60 to-blue-900/60 backdrop-blur-lg rounded-2xl border-2 border-purple-500/30 p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-300 text-sm font-medium">Total Complaints</p>
+                <p className="text-3xl font-bold text-white mt-2">{metrics.total}</p>
+                <p className="text-purple-300 text-xs mt-1">Active complaints in system</p>
+              </div>
+              <FileText className="w-8 h-8 text-purple-400" />
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-900/60 to-blue-900/60 backdrop-blur-lg rounded-2xl border-2 border-purple-500/30 p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-300 text-sm font-medium">Resolved</p>
+                <p className="text-3xl font-bold text-white mt-2">{metrics.resolved}</p>
+                <p className="text-purple-300 text-xs mt-1">Successfully resolved</p>
+              </div>
+              <CheckCircle className="w-8 h-8 text-green-400" />
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-900/60 to-blue-900/60 backdrop-blur-lg rounded-2xl border-2 border-purple-500/30 p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-300 text-sm font-medium">Verified</p>
+                <p className="text-3xl font-bold text-white mt-2">{metrics.verified}</p>
+                <p className="text-purple-300 text-xs mt-1">Verified by authorities</p>
+              </div>
+              <Shield className="w-8 h-8 text-blue-400" />
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-900/60 to-blue-900/60 backdrop-blur-lg rounded-2xl border-2 border-purple-500/30 p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-300 text-sm font-medium">Pending</p>
+                <p className="text-3xl font-bold text-white mt-2">{metrics.pending}</p>
+                <p className="text-purple-300 text-xs mt-1">Awaiting action</p>
+              </div>
+              <AlertTriangle className="w-8 h-8 text-yellow-400" />
+            </div>
+          </div>
         </div>
 
         {/* Filters */}
-        <div className="bg-opacity-10 bg-slate-500 border-white border-[1px] rounded-lg p-4 shadow-md">
-          <div className="flex items-center gap-2 mb-4 flex-wrap">
-            <Filter size={20} className="text-purple-600" />
-            <h2 className="text-lg font-semibold">Filter Complaints</h2>
+        <div className="bg-gradient-to-br from-purple-900/60 to-blue-900/60 backdrop-blur-lg rounded-2xl border-2 border-purple-500/30 p-6 shadow-xl mb-8">
+          <div className="flex items-center gap-2 mb-6">
+            <Filter className="w-5 h-5 text-purple-300" />
+            <h2 className="text-xl font-bold text-white">Filter Complaints</h2>
             {selectedMapRegion && (
-              <span className="ml-auto bg-purple-100 text-purple-800 text-sm px-3 py-1 rounded-full flex items-center gap-2">
+              <span className="ml-auto bg-purple-600/30 text-purple-300 text-sm px-3 py-2 rounded-full flex items-center gap-2 border border-purple-500/50">
                 <MapPin size={16} />
                 Viewing: {selectedMapRegion}
                 <button 
                   onClick={() => handleMapRegionSelect(null)}
-                  className="text-purple-600 hover:text-purple-800"
+                  className="text-purple-300 hover:text-white ml-2"
                 >
                   ×
                 </button>
@@ -154,9 +215,9 @@ const Dashboard = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm pb-1 font-medium mb-1">Region Type</label>
+              <label className="block text-purple-300 text-sm font-medium mb-2">Region Type</label>
               <select
-                className="w-full p-2 border rounded-md"
+                className="w-full bg-gradient-to-br from-purple-800/40 to-blue-800/40 backdrop-blur-lg text-white border-2 border-purple-500/50 rounded-xl px-4 py-3 font-medium focus:outline-none focus:border-purple-500 appearance-none cursor-pointer"
                 value={filters.regionType}
                 onChange={(e) => applyFilters({ ...filters, regionType: e.target.value, regionName: "all" })}
               >
@@ -169,9 +230,9 @@ const Dashboard = () => {
             </div>
 
             <div>
-              <label className="block text-sm pb-1 font-medium mb-1">Region Name</label>
+              <label className="block text-purple-300 text-sm font-medium mb-2">Region Name</label>
               <select
-                className="w-full p-2 border rounded-md"
+                className="w-full bg-gradient-to-br from-purple-800/40 to-blue-800/40 backdrop-blur-lg text-white border-2 border-purple-500/50 rounded-xl px-4 py-3 font-medium focus:outline-none focus:border-purple-500 appearance-none cursor-pointer disabled:opacity-50"
                 value={filters.regionName}
                 onChange={(e) => applyFilters({ ...filters, regionName: e.target.value })}
                 disabled={filters.regionType === "all"}
@@ -184,9 +245,9 @@ const Dashboard = () => {
             </div>
 
             <div>
-              <label className="block text-sm pb-1 font-medium mb-1">Issue Type</label>
+              <label className="block text-purple-300 text-sm font-medium mb-2">Issue Type</label>
               <select
-                className="w-full p-2 border rounded-md"
+                className="w-full bg-gradient-to-br from-purple-800/40 to-blue-800/40 backdrop-blur-lg text-white border-2 border-purple-500/50 rounded-xl px-4 py-3 font-medium focus:outline-none focus:border-purple-500 appearance-none cursor-pointer"
                 value={filters.type}
                 onChange={(e) => applyFilters({ ...filters, type: e.target.value })}
               >
@@ -201,9 +262,9 @@ const Dashboard = () => {
             </div>
 
             <div> 
-              <label className="block text-sm pb-1 font-medium mb-1">Status</label>
+              <label className="block text-purple-300 text-sm font-medium mb-2">Status</label>
               <select
-                className="w-full p-2 border rounded-md"
+                className="w-full bg-gradient-to-br from-purple-800/40 to-blue-800/40 backdrop-blur-lg text-white border-2 border-purple-500/50 rounded-xl px-4 py-3 font-medium focus:outline-none focus:border-purple-500 appearance-none cursor-pointer"
                 value={filters.status}
                 onChange={(e) => applyFilters({ ...filters, status: e.target.value })}
               >
@@ -217,17 +278,19 @@ const Dashboard = () => {
         </div>
 
         {/* Main Grid - Map + Complaints */}
-        <div className="grid md:grid-cols-2 gap-4">
-          <CivicMap 
-            issues={issues} 
-            selectedRegion={selectedMapRegion} 
-            onRegionSelect={handleMapRegionSelect} 
-          />
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="bg-gradient-to-br from-purple-900/60 to-blue-900/60 backdrop-blur-lg rounded-2xl border-2 border-purple-500/30 p-6 shadow-xl">
+            <CivicMap 
+              issues={issues} 
+              selectedRegion={selectedMapRegion} 
+              onRegionSelect={handleMapRegionSelect} 
+            />
+          </div>
 
-          <div className="rounded-lg shadow-md p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Recent Complaints</h2>
-              <span className="bg-purple-100 text-purple-800 text-sm px-2 py-1 rounded-full">
+          <div className="bg-gradient-to-br from-purple-900/60 to-blue-900/60 backdrop-blur-lg rounded-2xl border-2 border-purple-500/30 p-6 shadow-xl">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-white">Recent Complaints</h2>
+              <span className="bg-purple-600/30 text-purple-300 text-sm px-3 py-1 rounded-full border border-purple-500/50">
                 {issues.length} items
               </span>
             </div>
@@ -238,6 +301,16 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes twinkle {
+          0%, 100% { opacity: 0; }
+          50% { opacity: 1; }
+        }
+        .animate-twinkle {
+          animation: twinkle 3s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 };
