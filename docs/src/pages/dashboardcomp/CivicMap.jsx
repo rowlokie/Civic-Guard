@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from "react";
 import { MapContainer, TileLayer, GeoJSON, Tooltip, CircleMarker } from "react-leaflet";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 
@@ -27,12 +26,12 @@ const MUMBAI_AREAS_GEOJSON = {
   ]
 };
 
-// Color scale for complaint density
+// Color scale for complaint density - updated to purple theme
 const getAreaColor = (count) => {
-  if (count >= 10) return "#dc2626"; // Red
-  if (count >= 5) return "#f59e0b";  // Orange
-  if (count >= 1) return "#2563eb";  // Blue
-  return "#e5e7eb";                  // Gray
+  if (count >= 10) return "#dc2626"; // Red for high density
+  if (count >= 5) return "#f59e0b";  // Orange for medium density
+  if (count >= 1) return "#8b5cf6";  // Purple for low density
+  return "#4c1d95";                  // Dark purple for no complaints
 };
 
 // Opacity scale based on number of complaints
@@ -83,8 +82,9 @@ const CivicMap = ({ issues = [], onRegionSelect, selectedRegion }) => {
     return {
       fillColor: getAreaColor(count),
       fillOpacity: isHovered || isSelected ? 1 : getOpacity(count),
-      color: isSelected || isHovered ? "#000" : "#666",
-      weight: isSelected || isHovered ? 3 : 1,
+      color: isSelected || isHovered ? "#ffffff" : "#c084fc",
+      weight: isSelected || isHovered ? 4 : 2,
+      opacity: isSelected || isHovered ? 1 : 0.8,
     };
   };
 
@@ -99,9 +99,13 @@ const CivicMap = ({ issues = [], onRegionSelect, selectedRegion }) => {
     });
 
     const count = areaComplaints[areaName] || 0;
-    layer.bindTooltip(`${areaName}: ${count} complaint${count !== 1 ? "s" : ""}`, {
-      sticky: true
-    });
+    layer.bindTooltip(
+      `<div class="bg-gradient-to-br from-purple-900/90 to-blue-900/90 backdrop-blur-lg text-white px-3 py-2 rounded-lg border border-purple-500/50 shadow-lg">
+         <strong>${areaName}</strong><br>
+         ${count} complaint${count !== 1 ? "s" : ""}
+       </div>`,
+      { sticky: true, className: "custom-tooltip" }
+    );
   };
 
   // Areas without GeoJSON
@@ -114,24 +118,34 @@ const CivicMap = ({ issues = [], onRegionSelect, selectedRegion }) => {
 
   if (loading) {
     return (
-      <Card className="h-[500px] w-full flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-        <p>Loading map data...</p>
-      </Card>
+      <div className="h-[500px] w-full bg-gradient-to-br from-purple-900/60 to-blue-900/60 backdrop-blur-lg rounded-2xl border-2 border-purple-500/30 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-300" />
+        <p className="text-purple-300 ml-3">Loading map data...</p>
+      </div>
     );
   }
 
   return (
-    <Card className="h-[500px] w-full">
-      <CardHeader className="pb-3">
-        <CardTitle>Complaint Distribution by Area</CardTitle>
-        <div className="text-sm text-muted-foreground">{Object.keys(areaComplaints).length} areas with complaints</div>
-      </CardHeader>
-      <CardContent className="h-full p-0">
-        <MapContainer center={[19.0760, 72.8777]} zoom={11} scrollWheelZoom className="h-full w-full rounded-lg">
+    <div className="h-[500px] w-full bg-gradient-to-br from-purple-900/60 to-blue-900/60 backdrop-blur-lg rounded-2xl border-2 border-purple-500/30 p-6 shadow-xl">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-xl font-bold text-white">Complaint Distribution by Area</h3>
+        <div className="text-purple-300 text-sm bg-purple-600/30 px-3 py-1 rounded-full border border-purple-500/50">
+          {Object.keys(areaComplaints).length} areas with complaints
+        </div>
+      </div>
+      
+      <div className="h-[calc(100%-3rem)] w-full rounded-xl overflow-hidden border-2 border-purple-500/30">
+        <MapContainer 
+          center={[19.0760, 72.8777]} 
+          zoom={11} 
+          scrollWheelZoom 
+          className="h-full w-full"
+          style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e40af 100%)' }}
+        >
+          {/* Dark theme tile layer */}
           <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution="&copy; OpenStreetMap contributors"
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
           />
 
           {/* GeoJSON areas */}
@@ -141,30 +155,77 @@ const CivicMap = ({ issues = [], onRegionSelect, selectedRegion }) => {
           {fallbackAreas.map(({ area, count, coordinates }) => {
             const isSelected = selectedRegion === area;
             const isHovered = hoveredArea === area;
+            const radius = 8 + Math.log(count + 1) * 2;
+            
             return (
               <CircleMarker
                 key={area}
                 center={coordinates}
-                radius={8 + Math.log(count + 1) * 2}
-                color={isSelected || isHovered ? "#000" : getAreaColor(count)}
+                radius={radius}
+                color={isSelected || isHovered ? "#ffffff" : getAreaColor(count)}
                 fillColor={getAreaColor(count)}
-                fillOpacity={isSelected || isHovered ? 1 : getOpacity(count)}
-                weight={isSelected || isHovered ? 3 : 1}
+                fillOpacity={isSelected || isHovered ? 0.9 : getOpacity(count)}
+                weight={isSelected || isHovered ? 3 : 2}
+                opacity={isSelected || isHovered ? 1 : 0.8}
                 eventHandlers={{
                   click: () => onRegionSelect && onRegionSelect(selectedRegion === area ? undefined : area),
                   mouseover: () => setHoveredArea(area),
                   mouseout: () => setHoveredArea(undefined),
                 }}
               >
-                <Tooltip direction="top" offset={[0, -5]} opacity={1} permanent={isHovered || isSelected}>
-                  <div className="text-xs font-semibold">{area}: {count} complaint{count !== 1 ? "s" : ""}</div>
+                <Tooltip 
+                  direction="top" 
+                  offset={[0, -10]} 
+                  opacity={1} 
+                  permanent={isHovered || isSelected}
+                  className="custom-tooltip"
+                >
+                  <div className="bg-gradient-to-br from-purple-900/90 to-blue-900/90 backdrop-blur-lg text-white px-3 py-2 rounded-lg border border-purple-500/50 shadow-lg text-xs font-semibold">
+                    {area}: {count} complaint{count !== 1 ? "s" : ""}
+                  </div>
                 </Tooltip>
               </CircleMarker>
             );
           })}
         </MapContainer>
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Legend */}
+      <div className="flex flex-wrap gap-4 mt-4 text-xs text-purple-300">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-[#8b5cf6] rounded"></div>
+          <span>1-4 complaints</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-[#f59e0b] rounded"></div>
+          <span>5-9 complaints</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-[#dc2626] rounded"></div>
+          <span>10+ complaints</span>
+        </div>
+      </div>
+
+      <style>{`
+        .custom-tooltip .leaflet-tooltip {
+          background: transparent;
+          border: none;
+          box-shadow: none;
+        }
+        .leaflet-tooltip-top:before {
+          border-top-color: rgba(168, 85, 247, 0.5);
+        }
+        .leaflet-tooltip-bottom:before {
+          border-bottom-color: rgba(168, 85, 247, 0.5);
+        }
+        .leaflet-tooltip-left:before {
+          border-left-color: rgba(168, 85, 247, 0.5);
+        }
+        .leaflet-tooltip-right:before {
+          border-right-color: rgba(168, 85, 247, 0.5);
+        }
+      `}</style>
+    </div>
   );
 };
 
