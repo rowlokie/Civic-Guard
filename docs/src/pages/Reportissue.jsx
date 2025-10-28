@@ -211,7 +211,7 @@ const ReportIssue = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Form Section */}
-          <Card className="mission-card border-0">
+          <Card className="mission-card opacity-60 border-0">
             <CardHeader>
               <CardTitle className="flex items-center text-2xl gap-2">
                 <MapPin className="text-primary" size={20} />
