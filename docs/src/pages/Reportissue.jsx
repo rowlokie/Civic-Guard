@@ -194,7 +194,7 @@ const ReportIssue = () => {
   };
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
@@ -202,7 +202,7 @@ const ReportIssue = () => {
             <ArrowLeft size={20} />
           </Button>
           <div>
-            <h1 className="text-4xl font-bold gradient-text">Report New Issue</h1>
+            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-blue-300">Report New Issue</h1>
             <p className="text-muted-foreground mt-2">
               Help improve your community by reporting civic issues
             </p>
