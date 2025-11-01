@@ -361,7 +361,7 @@ const ReportIssue = () => {
             </CardContent>
           </Card>
 
-           <Card className="mission-card bg-opacity-80 border-0">
+           <Card className="mission-card bg-opacity-20 border-0">
             <CardHeader>
               <CardTitle >
                 <div className="text-2xl ">Reporting Tips</div></CardTitle>
