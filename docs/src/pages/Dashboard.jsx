@@ -17,7 +17,7 @@ const Dashboard = () => {
   const [selectedMapRegion, setSelectedMapRegion] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "civic-guard-production.up.railway.app";
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://civic-guard-production.up.railway.app";
 
   // Fetch issues and regions
   useEffect(() => {

@@ -38,43 +38,52 @@ const Leaderboard = () => {
         {users.map((player, index) => (
           <div
             key={player._id}
-            className={`relative bg-gradient-to-br from-purple-900/60 to-blue-900/60 backdrop-blur-lg p-6 rounded-2xl border-2 transition-all duration-300 hover:scale-102 ${
+            className={`relative bg-gradient-to-br from-purple-900/60 to-blue-900/60 backdrop-blur-lg p-6 rounded-2xl border-2 transition-all duration-300 hover:scale-[1.02] ${
               index < 3
-                ? 'border-yellow-500/80 shadow-2xl shadow-yellow-500/30'
-                : player.name === 'You'
-                ? 'border-purple-500/80 shadow-xl shadow-purple-500/30'
-                : 'border-purple-500/30'
+                ? "border-yellow-500/80 shadow-2xl shadow-yellow-500/30"
+                : player.name === "You"
+                ? "border-purple-500/80 shadow-xl shadow-purple-500/30"
+                : "border-purple-500/30"
             }`}
           >
             {index < 3 && (
               <div className="absolute -top-3 -right-3">
                 <div className="bg-gradient-to-br from-yellow-500 to-amber-600 w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold shadow-lg">
-                  {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
+                  {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
                 </div>
               </div>
             )}
-            
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="text-2xl font-bold text-purple-300 w-8">#{index + 1}</div>
-                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+
+            {/* ✅ Responsive layout fix */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              {/* Left Section */}
+              <div className="flex items-center space-x-4 min-w-0">
+                <div className="text-2xl font-bold text-purple-300 w-8 shrink-0">
+                  #{index + 1}
+                </div>
+                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
                   <img
                     src={player.avatar || "/default-avatar.png"}
                     alt={`${player.name} avatar`}
                     className="w-10 h-10 rounded-full object-cover"
                   />
                 </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white">{player.name}</h3>
-                  <p className="text-sm text-purple-300">{player.email}</p>
+                <div className="min-w-0">
+                  <h3 className="text-lg sm:text-xl font-bold text-white truncate">
+                    {player.name}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-purple-300 truncate">
+                    {player.email}
+                  </p>
                 </div>
               </div>
-              
-              <div className="text-right">
-                <div className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-amber-300">
+
+              {/* Right Section */}
+              <div className="text-left sm:text-right w-full sm:w-auto">
+                <div className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-amber-300 break-words">
                   {player.realBalance.toLocaleString()} Coins
                 </div>
-                <div className="text-sm text-purple-300">UrbanCoin</div>
+                <div className="text-xs sm:text-sm text-purple-300">UrbanCoin</div>
               </div>
             </div>
           </div>
