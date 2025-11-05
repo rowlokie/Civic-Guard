@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import axios from "axios";
-import { KPICard } from "./dashboardcomp/KPICard";
+import { useNavigate } from "react-router-dom";
 import { ComplaintsList } from "./dashboardcomp/ComplaintsLists";
 import CivicMap from "./dashboardcomp/CivicMap";
 import { AlertTriangle, CheckCircle, Shield, FileText, MapPin, Filter, Download } from "lucide-react";
@@ -12,36 +12,62 @@ const Dashboard = () => {
     regionType: "all",
     regionName: "all",
     type: "all",
-    status: "all"
+    status: "all",
   });
   const [selectedMapRegion, setSelectedMapRegion] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://civic-guard-production.up.railway.app";
+  const navigate = useNavigate();
+  const BACKEND_URL =
+    import.meta.env.VITE_BACKEND_URL || "https://civic-guard-production.up.railway.app";
 
-  // Fetch issues and regions
+  // 🔐 Check authentication
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      navigate("/login");
+      return;
+    }
+
+    const token = JSON.parse(storedUser)?.token;
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    // ✅ Set token for all axios requests
+    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  }, [navigate]);
+
+  // 🧭 Fetch issues and regions
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         const [issuesRes, regionsRes] = await Promise.all([
           axios.get(`${BACKEND_URL}/api/issues`),
-          axios.get(`${BACKEND_URL}/api/issues/regions`)
+          axios.get(`${BACKEND_URL}/api/issues/regions`),
         ]);
 
         setIssues(Array.isArray(issuesRes.data) ? issuesRes.data : []);
         setRegions(regionsRes.data || { cities: [], areas: [], suburbs: [], streets: [] });
       } catch (err) {
         console.error("Error fetching data:", err);
+        if (err.response?.status === 401) {
+          // 🔄 Redirect if token expired
+          localStorage.removeItem("user");
+          navigate("/login");
+        }
         setIssues([]);
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
-  }, [BACKEND_URL]);
 
-  // Apply filters
+    fetchData();
+  }, [BACKEND_URL, navigate]);
+
+  // 🌐 Apply filters
   const applyFilters = async (newFilters) => {
     try {
       setLoading(true);
@@ -66,7 +92,6 @@ const Dashboard = () => {
     }
   };
 
-  // Map region selection
   const handleMapRegionSelect = (regionName) => {
     setSelectedMapRegion(regionName);
     if (regionName) {
@@ -76,24 +101,27 @@ const Dashboard = () => {
     }
   };
 
-  // Get region options for select
   const getRegionOptions = () => {
     switch (filters.regionType) {
-      case "city": return regions.cities;
-      case "area": return regions.areas;
-      case "suburb": return regions.suburbs;
-      case "street": return regions.streets;
-      default: return [];
+      case "city":
+        return regions.cities;
+      case "area":
+        return regions.areas;
+      case "suburb":
+        return regions.suburbs;
+      case "street":
+        return regions.streets;
+      default:
+        return [];
     }
   };
 
-  // Safe metrics calculation
   const metrics = useMemo(() => {
     const arr = Array.isArray(issues) ? issues : [];
     const total = arr.length;
-    const resolved = arr.filter(c => c.status === "Resolved").length;
-    const verified = arr.filter(c => c.status === "Verified").length;
-    const pending = arr.filter(c => c.status === "Pending").length;
+    const resolved = arr.filter((c) => c.status === "Resolved").length;
+    const verified = arr.filter((c) => c.status === "Verified").length;
+    const pending = arr.filter((c) => c.status === "Pending").length;
     return { total, resolved, verified, pending };
   }, [issues]);
 
@@ -107,6 +135,7 @@ const Dashboard = () => {
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-blue-950 relative overflow-hidden">

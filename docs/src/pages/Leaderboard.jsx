@@ -1,10 +1,26 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Leaderboard = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [authChecking, setAuthChecking] = useState(true);
+  const navigate = useNavigate();
 
+  // 🔐 Frontend login check
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login"); // redirect if not logged in
+      return;
+    }
+    setAuthChecking(false);
+  }, [navigate]);
+
+  // 🚀 Fetch leaderboard data
+  useEffect(() => {
+    if (authChecking) return; // wait until auth check is done
+
     const fetchLeaderboard = async () => {
       try {
         const res = await fetch("https://civic-guard-production.up.railway.app/api/leaderboard");
@@ -18,12 +34,13 @@ const Leaderboard = () => {
     };
 
     fetchLeaderboard();
-  }, []);
+  }, [authChecking]);
 
-  if (loading) {
+  // 🔄 Loading spinner during auth or data fetch
+  if (authChecking || loading) {
     return (
       <div className="min-h-screen flex justify-center items-center text-purple-300">
-        Loading leaderboard...
+        {authChecking ? "Checking authentication..." : "Loading leaderboard..."}
       </div>
     );
   }
@@ -54,9 +71,7 @@ const Leaderboard = () => {
               </div>
             )}
 
-            {/* ✅ Responsive layout fix */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              {/* Left Section */}
               <div className="flex items-center space-x-4 min-w-0">
                 <div className="text-2xl font-bold text-purple-300 w-8 shrink-0">
                   #{index + 1}
@@ -78,7 +93,6 @@ const Leaderboard = () => {
                 </div>
               </div>
 
-              {/* Right Section */}
               <div className="text-left sm:text-right w-full sm:w-auto">
                 <div className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-amber-300 break-words">
                   {player.realBalance.toLocaleString()} Coins
@@ -90,7 +104,6 @@ const Leaderboard = () => {
         ))}
       </div>
 
-      {/* Stats footer */}
       <div className="mt-8 p-6 rounded-2xl bg-gradient-to-br from-purple-900/40 to-blue-900/40 backdrop-blur-lg border border-purple-500/30">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
           <div>
