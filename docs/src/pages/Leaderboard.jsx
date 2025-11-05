@@ -7,7 +7,7 @@ const Leaderboard = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const res = await fetch("https://civic-guard-3tds.onrender.com/api/leaderboard");
+        const res = await fetch("https://civic-guard-production.up.railway.app/api/leaderboard");
         const data = await res.json();
         setUsers(data || []);
       } catch (err) {

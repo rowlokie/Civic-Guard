@@ -24,7 +24,7 @@ const Issues = () => {
     }
 
     try {
-      const response = await axios.get("https://civic-guard-3tds.onrender.com/api/auth/me", {
+      const response = await axios.get("https://civic-guard-production.up.railway.app/api/auth/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUser(response.data);
@@ -42,7 +42,7 @@ const Issues = () => {
   useEffect(() => {
     const fetchIssues = async () => {
       try {
-        const res = await fetch("https://civic-guard-3tds.onrender.com/api/issues", {
+        const res = await fetch("https://civic-guard-production.up.railway.app/api/issues", {
           mode: "cors",
         });
         if (!res.ok) throw new Error(`Status ${res.status}`);
@@ -69,9 +69,9 @@ const Issues = () => {
 
     let url = "";
     if (newStatus === "Verified")
-      url = `https://civic-guard-3tds.onrender.com/api/issues/verify/${id}`;
+      url = `https://civic-guard-production.up.railway.app/api/issues/verify/${id}`;
     else if (newStatus === "Resolved")
-      url = `https://civic-guard-3tds.onrender.com/api/issues/resolve/${id}`;
+      url = `https://civic-guard-production.up.railway.app/api/issues/resolve/${id}`;
     else return console.error("❌ Unsupported status:", newStatus);
 
     try {

@@ -61,7 +61,7 @@ const ReportIssue = () => {
 
       try {
         const res = await fetch(
-          `https://civic-guard-3tds.onrender.com/api/location/reverse?lat=${latitude}&lng=${longitude}`
+          `https://civic-guard-production.up.railway.app/api/location/reverse?lat=${latitude}&lng=${longitude}`
         );
         const data = await res.json();
 
@@ -156,7 +156,7 @@ const ReportIssue = () => {
       data.append("location", JSON.stringify(formattedLocation));
       if (image) data.append("image", image);
 
-      const response = await fetch("https://civic-guard-3tds.onrender.com/api/issues/report", {
+      const response = await fetch("https://civic-guard-production.up.railway.app/api/issues/report", {
         method: "POST",
         headers: { Authorization: `Bearer ${user.token}` },
         body: data,
