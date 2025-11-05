@@ -46,7 +46,7 @@ const ProfilePage = () => {
     } catch (err) {
       console.error('Error fetching profile:', err);
       setError(err?.response?.data?.error || 'Failed to fetch user profile.');
-      setTimeout(() => navigate('/login'), 1200);
+      setTimeout(() => navigate('/Register'), 1200);
     } finally {
       setLoading(false);
     }
