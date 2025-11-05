@@ -209,3 +209,56 @@ export const resolveIssue = async (req, res) => {
     res.status(500).json({ error: 'Resolve failed', details: err.message });
   }
 };
+
+// ------------------------
+// Delete an issue (Admin only)
+// ------------------------
+export const deleteIssue = async (req, res) => {
+  try {
+    // Ensure user is authenticated
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized: User not found' });
+    }
+
+    // Ensure only admins can delete
+    const user = await User.findById(req.user._id);
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied: Admins only.' });
+    }
+
+    // Find the issue
+    const issue = await Issue.findById(req.params.id);
+    if (!issue) {
+      return res.status(404).json({ error: 'Issue not found' });
+    }
+
+    // Delete image from Cloudinary if it exists
+    if (issue.imageUrl) {
+      try {
+        const parts = issue.imageUrl.split('/');
+        const publicId = parts.slice(parts.indexOf('civicguard'), -1).join('/').split('.')[0];
+        await cloudinary.uploader.destroy(publicId);
+      } catch (cloudErr) {
+        console.warn('⚠️ Failed to delete image from Cloudinary:', cloudErr.message);
+      }
+    }
+
+    // Delete issue record
+    await issue.deleteOne();
+
+    // Remove issue reference from users’ reports/validations
+    await User.updateMany(
+      { reports: issue._id },
+      { $pull: { reports: issue._id } }
+    );
+    await User.updateMany(
+      { validations: issue._id },
+      { $pull: { validations: issue._id } }
+    );
+
+    res.json({ message: '🗑️ Issue deleted successfully.' });
+  } catch (err) {
+    console.error('❌ Delete issue failed:', err);
+    res.status(500).json({ error: 'Server error while deleting issue.', details: err.message });
+  }
+};

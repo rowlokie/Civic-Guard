@@ -6,7 +6,8 @@ import {
   getAllIssues, 
   verifyIssue, 
   resolveIssue, 
-  getRegions 
+  getRegions,
+  deleteIssue // 🆕 import delete controller
 } from '../controllers/issueController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -14,9 +15,12 @@ const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
 
 router.post('/report', protect, upload.single('image'), reportIssue);
-router.get('/', getAllIssues); // Now supports query params: ?regionType=city&regionName=Mumbai&type=Pothole&status=Pending
-router.get('/regions', getRegions); // New endpoint for getting available regions
+router.get('/', getAllIssues); // supports query params
+router.get('/regions', getRegions);
 router.put('/verify/:id', protect, verifyIssue);
 router.put('/resolve/:id', protect, resolveIssue);
+
+// 🆕 Delete issue (admin only)
+router.delete('/:id', protect, deleteIssue);
 
 export default router;

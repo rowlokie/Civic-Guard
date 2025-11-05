@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { MapPin, CheckCircle } from "lucide-react";
+import { MapPin, Trash2 } from "lucide-react"; // added Trash2 icon
 import axios from "axios";
 
 const Issues = () => {
@@ -62,7 +62,7 @@ const Issues = () => {
   const filteredIssues =
     selectedFilter === "All" ? issues : issues.filter((issue) => issue.status === selectedFilter);
 
-  // Update status for admin
+  // Update status (verify / resolve)
   const updateStatus = async (id, newStatus) => {
     const token = storedUser?.token;
     if (!token) return console.error("❌ No token found");
@@ -92,6 +92,38 @@ const Issues = () => {
     }
   };
 
+  // 🗑️ Delete issue (only if Pending)
+  const deleteIssue = async (id) => {
+    const token = storedUser?.token;
+    if (!token) return alert("Unauthorized");
+
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this issue? This action cannot be undone."
+    );
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(
+        `https://civic-guard-production.up.railway.app/api/issues/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to delete issue");
+
+      // Remove from local list
+      setIssues((prev) => prev.filter((issue) => issue._id !== id));
+      alert("Issue deleted successfully ✅");
+    } catch (err) {
+      console.error("Error deleting issue:", err);
+      alert("Failed to delete issue. Try again later.");
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
@@ -99,7 +131,7 @@ const Issues = () => {
         <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-blue-300">
           All Reported Issues
         </h1>
-        
+
         <div className="relative">
           <select
             value={selectedFilter}
@@ -150,49 +182,67 @@ const Issues = () => {
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute top-4 right-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-lg ${
-                      issue.status === 'Resolved' 
-                        ? 'bg-green-600 text-white' 
-                        : issue.status === 'Verified'
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-yellow-600 text-white'
-                    }`}>
-                      {issue.status === 'Resolved' && '✓ '}
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-bold shadow-lg ${
+                        issue.status === "Resolved"
+                          ? "bg-green-600 text-white"
+                          : issue.status === "Verified"
+                          ? "bg-purple-600 text-white"
+                          : "bg-yellow-600 text-white"
+                      }`}
+                    >
+                      {issue.status === "Resolved" && "✓ "}
                       {issue.status}
                     </span>
                   </div>
                 </div>
               )}
-              
+
               <div className="p-5">
-                <h3 className="text-xl font-bold text-white mb-3 capitalize">{issue.type}</h3>
-                
+                <h3 className="text-xl font-bold text-white mb-3 capitalize">
+                  {issue.type}
+                </h3>
+
                 <div className="flex items-start space-x-2 mb-3">
                   <MapPin className="w-4 h-4 text-purple-300 mt-0.5 flex-shrink-0" />
                   <p className="text-sm text-purple-200 line-clamp-2">
                     {issue.location?.address || "Location not provided"}
                   </p>
                 </div>
-                
-                <p className="text-sm text-purple-300 mb-4">{issue.description}</p>
-                
+
+                <p className="text-sm text-purple-300 mb-4">
+                  {issue.description}
+                </p>
+
                 {/* Admin Buttons */}
-                {isAdmin && issue.status !== "Resolved" && (
+                {isAdmin && (
                   <div className="flex gap-2">
-                    {issue.status !== "Verified" && (
+                    {issue.status === "Pending" && (
+                      <>
+                        <button
+                          onClick={() => updateStatus(issue._id, "Verified")}
+                          className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
+                        >
+                          Verify
+                        </button>
+                        {/* 🗑️ Delete button visible only if Pending */}
+                        <button
+                          onClick={() => deleteIssue(issue._id)}
+                          className="flex items-center justify-center bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
+                        >
+                          <Trash2 size={18} className="mr-1" /> Delete
+                        </button>
+                      </>
+                    )}
+
+                    {issue.status === "Verified" && (
                       <button
-                        onClick={() => updateStatus(issue._id, "Verified")}
-                        className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
+                        onClick={() => updateStatus(issue._id, "Resolved")}
+                        className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
                       >
-                        Verify
+                        Resolve
                       </button>
                     )}
-                    <button
-                      onClick={() => updateStatus(issue._id, "Resolved")}
-                      className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
-                    >
-                      Resolve
-                    </button>
                   </div>
                 )}
               </div>
