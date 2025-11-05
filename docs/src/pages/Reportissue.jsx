@@ -27,6 +27,7 @@ const ReportIssue = () => {
   });
 
   const [image, setImage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [location, setLocation] = useState({
     lat: "",
@@ -56,39 +57,45 @@ const ReportIssue = () => {
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      const { latitude, longitude } = pos.coords;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
 
-      try {
-        const res = await fetch(
-          `https://civic-guard-production.up.railway.app/api/location/reverse?lat=${latitude}&lng=${longitude}`
-        );
-        const data = await res.json();
+        try {
+          const res = await fetch(
+            `https://civic-guard-production.up.railway.app/api/location/reverse?lat=${latitude}&lng=${longitude}`
+          );
+          const data = await res.json();
 
-        setLocation({
-          lat: latitude,
-          lng: longitude,
-          road: data.address.road || "",
-          area: data.address.suburb || data.address.city_district || "",
-          city: data.address.city || data.address.town || "",
-          state: data.address.state || "",
-          country: data.address.country || "",
-        });
+          setLocation({
+            lat: latitude,
+            lng: longitude,
+            road: data.address.road || "",
+            area: data.address.suburb || data.address.city_district || "",
+            city: data.address.city || data.address.town || "",
+            state: data.address.state || "",
+            country: data.address.country || "",
+          });
 
-        toast({ title: "Location fetched", description: "Live location fetched successfully!" });
-      } catch (err) {
+          toast({ title: "Location fetched", description: "Live location fetched successfully!" });
+        } catch (err) {
+          console.error(err);
+          toast({ title: "Error", description: "Failed to fetch address.", variant: "destructive" });
+        }
+      },
+      (err) => {
         console.error(err);
-        toast({ title: "Error", description: "Failed to fetch address.", variant: "destructive" });
+        toast({ title: "Error", description: "Failed to get location.", variant: "destructive" });
       }
-    }, (err) => {
-      console.error(err);
-      toast({ title: "Error", description: "Failed to get location.", variant: "destructive" });
-    });
+    );
   };
 
   // 🔹 Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isSubmitting) return; // prevent multiple clicks
+    setIsSubmitting(true);
 
     const { title, type, description, priority } = formData;
 
@@ -98,6 +105,7 @@ const ReportIssue = () => {
         description: "Please fill in all required fields including location.",
         variant: "destructive",
       });
+      setIsSubmitting(false);
       return;
     }
 
@@ -108,10 +116,11 @@ const ReportIssue = () => {
         description: "🔒 Please login/register to report an issue.",
         variant: "destructive",
       });
+      setIsSubmitting(false);
       return;
     }
 
-    // 🔹 Normalize issue type to match backend enum
+    // 🔹 Normalize issue type
     let normalizedType = type.toLowerCase();
     switch (normalizedType) {
       case "pothole":
@@ -135,7 +144,7 @@ const ReportIssue = () => {
         break;
     }
 
-    // 🔹 Format location to match backend schema
+    // 🔹 Format location
     const formattedLocation = {
       street: location.road || "",
       area: location.area || "",
@@ -156,32 +165,36 @@ const ReportIssue = () => {
       data.append("location", JSON.stringify(formattedLocation));
       if (image) data.append("image", image);
 
-      const response = await fetch("https://civic-guard-production.up.railway.app/api/issues/report", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${user.token}` },
-        body: data,
-      });
+      const response = await fetch(
+        "https://civic-guard-production.up.railway.app/api/issues/report",
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${user.token}` },
+          body: data,
+        }
+      );
 
       const resData = await response.json();
 
       if (response.ok) {
         toast({
-          title: "Issue Reported Successfully!",
-          description: "Your civic issue has been submitted and will be reviewed by authorities.",
+          title: "✅ Issue Reported!",
+          description: "Redirecting to your issues...",
         });
 
-        // Reset form
+        // Reset form and redirect immediately
         setFormData({ title: "", type: "", description: "", priority: "medium" });
         setImage(null);
         setLocation({ lat: "", lng: "", road: "", area: "", city: "", state: "", country: "" });
 
-        navigate("/issues");
+        navigate("/issues", { replace: true });
       } else {
         toast({
           title: "Submission Failed",
           description: resData.error || "Something went wrong while submitting your issue.",
           variant: "destructive",
         });
+        setIsSubmitting(false);
       }
     } catch (error) {
       console.error("Error submitting complaint:", error);
@@ -190,19 +203,27 @@ const ReportIssue = () => {
         description: "⚠️ Something went wrong. Please try again later.",
         variant: "destructive",
       });
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen">
       <div className="container mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/issues")} className="hero-glow">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/issues")}
+            className="hero-glow"
+          >
             <ArrowLeft size={20} />
           </Button>
           <div>
-            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-blue-300">Report New Issue</h1>
+            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-blue-300">
+              Report New Issue
+            </h1>
             <p className="text-muted-foreground mt-2">
               Help improve your community by reporting civic issues
             </p>
@@ -247,7 +268,9 @@ const ReportIssue = () => {
                       <SelectItem value="sewage">Sewage Issue</SelectItem>
                       <SelectItem value="drains">Blocked Drains</SelectItem>
                       <SelectItem value="garbage">Garbage Collection</SelectItem>
-                      <SelectItem value="infrastructure">Broken Infrastructure</SelectItem>
+                      <SelectItem value="infrastructure">
+                        Broken Infrastructure
+                      </SelectItem>
                       <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
@@ -353,74 +376,69 @@ const ReportIssue = () => {
                   )}
                 </div>
 
-                <Button type="submit" className="w-full hero-glow">
-                  <Upload size={18} className="mr-2" />
-                  Submit Report
+                {/* Submit */}
+                <Button type="submit" className="w-full hero-glow" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Upload size={18} className="mr-2 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <Upload size={18} className="mr-2" />
+                      Submit Report
+                    </>
+                  )}
                 </Button>
               </form>
             </CardContent>
           </Card>
 
-           <Card className="mission-card opacity-90 border-0">
+          {/* Tips Section */}
+          <Card className="mission-card opacity-90 border-0">
             <CardHeader>
-              <CardTitle >
-                <div className="text-2xl ">Reporting Tips</div></CardTitle>
+              <CardTitle>
+                <div className="text-2xl">Reporting Tips</div>
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-3">
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-primary font-semibold text-sm">1</span>
+                {[
+                  {
+                    title: "Be Specific",
+                    desc: "Provide exact location details and clear description of the issue",
+                  },
+                  {
+                    title: "Add Photos",
+                    desc: "Pictures help authorities understand and prioritize issues",
+                  },
+                  {
+                    title: "Safety First",
+                    desc: "Mark urgent safety hazards as high priority",
+                  },
+                  {
+                    title: "Track Progress",
+                    desc: "Check the dashboard to see updates on your reported issues",
+                  },
+                ].map((tip, index) => (
+                  <div key={index} className="flex gap-3">
+                    <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-primary font-semibold text-sm">
+                        {index + 1}
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium">{tip.title}</h4>
+                      <p className="text-sm text-muted-foreground">{tip.desc}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-medium">Be Specific</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Provide exact location details and clear description of the issue
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-primary font-semibold text-sm">2</span>
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Add Photos</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Pictures help authorities understand and prioritize issues
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-primary font-semibold text-sm">3</span>
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Safety First</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Mark urgent safety hazards as high priority
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-primary font-semibold text-sm">4</span>
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Track Progress</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Check the dashboard to see updates on your reported issues
-                    </p>
-                  </div>
-                </div>
+                ))}
               </div>
 
               <div className="mt-6 p-4 bg-primary/10 rounded-lg">
                 <h4 className="font-medium text-primary mb-2">Emergency Issues</h4>
                 <p className="text-sm text-muted-foreground">
-                  For urgent safety hazards that require immediate attention, 
+                  For urgent safety hazards that require immediate attention,
                   please also contact local emergency services.
                 </p>
               </div>
