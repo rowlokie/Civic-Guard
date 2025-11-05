@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -59,7 +59,7 @@ const Register = () => {
       // Store token
       localStorage.setItem("token", res.data.token);
 
-      // Navigate after short delay
+      // Navigate after successful registration
       navigate("/");
     } catch (err) {
       console.error("❌ Registration failed:", err);
@@ -70,7 +70,7 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 to-blue-900 p-6">
+    <div className="min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-md bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-purple-500/30 shadow-lg">
         <h2 className="text-3xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-blue-300 mb-6">
           Create Account
@@ -141,6 +141,17 @@ const Register = () => {
             {loading ? "Registering..." : "Register"}
           </button>
         </form>
+
+        {/* ✅ Login Redirect Section */}
+        <p className="text-center text-purple-300 text-sm mt-6">
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="text-blue-400 hover:text-blue-300 underline transition"
+          >
+            Log in
+          </Link>
+        </p>
       </div>
     </div>
   );
